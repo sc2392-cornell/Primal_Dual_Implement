@@ -7,9 +7,9 @@
 
 #include<cstdlib>
 #include"PSteiner.h"
-#include"boost/graph/adjacency_matrix.hpp"
+//#include"boost/graph/adjacency_matrix.hpp"
 using namespace std;
-
+//using std::numeric_limits;
 /*
  * 
  */
@@ -19,13 +19,25 @@ void print_inst(PSInst);
 
 
 int main(int argc, char** argv) {
-    PSInst psinst=read_in ("pcstp/K100.1.dat");
+    string f_name=argv[1];//"pcstp/P400.4.dat";
+    //for(int i=0; i<=9; i++){
+        //if(i==9){f_name="pcstp/K100.1.dat";}
+        //else{f_name[11]+=1;}
+        PSInst psinst=read_in (f_name);
     print_inst(psinst);
-    PSteiner PS(psinst);
-    PS.print_PS();
+        PSteiner PS(psinst);
+    //PS.print_PS();
     
-    PS.Algo();
-    PS.print_Algo_sol();
+        PS.Algo();
+        cout<<"??"<<endl;
+        vector<double> ans = PS.Out_sol();
+        cout.precision(15);
+        for(auto it=ans.begin();it!=ans.end();it++){
+            cout<<*it<< " ";
+        }
+        cout<<endl;
+    //}
+    
     
     return 0;
 }
@@ -56,7 +68,11 @@ PSInst read_in( string arg ){
             if(!getline( ss, s, ' ' )) { break;}
             psinst.num_arr_terms=stoi(s);
             if(!getline( ss, s, ' ' )) { break;}
-            psinst.opt_val_offline=stoi(s);
+            if(s[0]==' '){
+                if(!getline( ss, s, ' ' )) { break;}
+            }
+                psinst.opt_val_offline=stoi(s);
+            
         }
         for(int i=0; i< psinst.num_arr_terms;i++){
             if (!getline( infile, s )) break;

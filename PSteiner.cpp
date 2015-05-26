@@ -46,7 +46,7 @@ PSteiner::~PSteiner() {
 const node_val_pair PSteiner::Find_dual_j_limit(int j,unordered_set<int> ActMoat1){
 
     node_j_pair njp; njp.j=j;
-    node_val_pair nvp; nvp.val=500000;
+    node_val_pair nvp; nvp.val=pow(2.0,j);
     //if(ActMoat1==ActMoat2) return nvp;
     
     for(auto it1=ActMoat1.begin(); it1!=ActMoat1.end(); it1++){
@@ -67,7 +67,7 @@ const node_val_pair PSteiner::Find_dual_j_limit(int j,unordered_set<int> ActMoat
 const edge_val_pair PSteiner::Find_tight_j_edge_1(int j, unordered_set<int> ActMoat1){ // only 1 moat is active
     edge_j_pair tjp; tjp.j=j; 
     node_pair np;
-    edge_val_pair min_pair; min_pair.node1=0; min_pair.node2=0; min_pair.val=500000;
+    edge_val_pair min_pair; min_pair.node1=0; min_pair.node2=0; min_pair.val=pow(2.0,j);
     double temp_v=0;
     if(!ActMoat1.empty()){
         for(auto it1=ActMoat1.begin(); it1!=ActMoat1.end(); it1++){
@@ -123,10 +123,10 @@ moat_val_pair PSteiner::Find_pnty_j_moat(int j, unordered_set<int> ActMoat1){
     moat_val_pair mvp; mvp.val=500000;
     
     
-    bool P_non_empty = !previous_active_terms.empty();
+    //bool P_non_empty = !prev_terms.empty();
     double temp_pnty1=0; 
     for(auto it= ActMoat1.begin(); it!=ActMoat1.end(); it++){
-        if( (P_non_empty && (previous_active_terms.find(*it)!=previous_active_terms.end() ))|| (*it)==current_active_term ){ 
+        if(prev_terms.find(*it)!=prev_terms.end() ){ 
             temp_pnty1+= terms_pnty[*it];
         }
     }
@@ -141,7 +141,7 @@ moat_val_pair PSteiner::Find_pnty_j_moat(int j, unordered_set<int> ActMoat1){
 }
 
 
-node_bool_pair PSteiner::Update_Consolidate_CarryOn(int j, int node){ // find if there is a previous_active_terms that belongs to the same level-j moat as node, but not connected in F
+/*node_bool_pair PSteiner::Update_Consolidate_CarryOn(int j, int node){ // find if there is a previous_active_terms that belongs to the same level-j moat as node, but not connected in F
     node_bool_pair ret;
     if(previous_active_terms.empty()) return ret;
     if(node==0) return ret;
@@ -152,26 +152,31 @@ node_bool_pair PSteiner::Update_Consolidate_CarryOn(int j, int node){ // find if
         }
     }
 }
+*/
 
 //GOOD, except Dijkstra is not checked
 void PSteiner::Consolidate(int j){
-    if(!_Aj.empty()){
+    bool Modified=true;
+    while(Modified){
+        Modified=false;
         for(auto it=_Aj.begin();it!=_Aj.end();it++){
-            for(auto it2=previous_active_terms.begin(); it2!=previous_active_terms.end(); it2++){
+            //if(*it==RootInd) continue;// it doesn't make sense to connect root to any previously active nodes 
+            for(auto it2=_P[j].begin(); it2!=_P[j].end(); it2++){
+                // it and it2 should be in same level j moat, but not in same ConnComp
                 if(moats[j][*it].find(*it2)!= moats[j][*it].end() && ConnComp[*it].find(*it2)==ConnComp[*it].end()){
                     DG_Dijkstra(j,*it, *it2);
-                   
+                    Modified=true;
                 }
             }
         }
-    
     }
-    
-    //updating A is done in Dijkstra 
-    
-    
-    
-    
+    //update _Aj
+    if(ConnComp[current_active_term].find(RootInd)!=ConnComp[current_active_term].end()){
+        _Aj.clear();
+        _A.clear();
+    }
+
+}
 /*
     node_bool_pair carryonR,carryonC;
     
@@ -193,8 +198,24 @@ void PSteiner::Consolidate(int j){
         carryonC = Update_Consolidate_CarryOn(j, current_active_term);  
     }  
 */
-}
 
+/*
+void PSteiner::Join_CC(int j){
+    if(!_Aj.empty()){
+        unordered_set<int> rep_Aj=_Aj;
+        for(auto it=rep_Aj.begin();it!=rep_Aj.end();it++){
+            for(auto it2=_P[j].begin(); it2!=_P[j].end(); it2++){
+                // it and it2 should be in same level j moat, but not in same ConnComp
+                if(moats[j][*it].find(*it2)!= moats[j][*it].end() && ConnComp[*it].find(*it2)==ConnComp[*it].end()){
+                    DG_Dijkstra(j,*it, *it2);
+                }
+            }
+        }
+    }
+}
+*/
+
+/*
 void PSteiner::Dijkstra(const int s1, const int s2){
     cout<<"______Invoked Dijkstra to connect "<<s1<<" to "<<s2<<endl;   
     
@@ -270,6 +291,7 @@ void PSteiner::Dijkstra(const int s1, const int s2){
     
     
 }
+*/
 
 void PSteiner::DG_Dijkstra(int j, const int s1, const int s2){
     cout<<"______Invoked DG_Dijkstra to connect "<<s1<<" to "<<s2<<endl;   
@@ -384,6 +406,9 @@ void PSteiner::DG_Dijkstra(int j, const int s1, const int s2){
                 ConnComp[*it]=NCC;
             }
             
+            //push to bought_edges:
+            bought_edges.push_back(np);
+            
         }
         else{
             cout<<"Existing edge  "<<np.node1<<" -- "<<np.node2<<endl; 
@@ -399,48 +424,6 @@ void PSteiner::DG_Dijkstra(int j, const int s1, const int s2){
 }
 
 
-
-void PSteiner::Join_CC(int j){
-    unordered_set<int> ret=_Aj; // active terms to check
-    
-    cout<<"Join_CC called with active terms: ";
-    for(auto it=ret.begin();it!=ret.end();it++){
-        cout<<*it<<" ";
-    }
-    bool unchanged=false;        
-    while(!unchanged){
-        unchanged=true;
-        for(auto it1=ret.begin(); it1!=ret.end(); it1++ ){
-            if(_Aj.empty() || _Aj.find(*it1)==_Aj.end()){   continue;   }// if it1 is actually not active now, then continue
-            
-            unordered_set<int> Cmoat=moats[j][*it1];// current members in same moats[j] to check
-
-            for(auto it2= Cmoat.begin(); it2!=Cmoat.end();it2++){
-                if(*it2 == *it1 || ConnComp[*it2].find(*it1)!=ConnComp[*it2].end() ) continue; // if two terms are connected, then continue
-                if( (!previous_active_terms.empty() && previous_active_terms.find(*it2)!=previous_active_terms.end()) ){
-                    // if it2 is previously active and 
-                    DG_Dijkstra(j,*it1, *it2);
-                    _Aj.erase(*it1);
-                    _A.erase(*it1);
-                    unchanged=false;
-                }
-                else if(ret.find(*it2)!=ret.end()){
-                    DG_Dijkstra(j,*it1, *it2);
-                    _Aj.erase(*it1); _Aj.erase(*it2);
-                    _A.erase(*it1);_A.erase(*it2);
-                    unchanged=false;
-                }
-            }
-        }
-        
-    }
-    cout<<" and end with leftover level-j terms: ";
-    for(auto it=_Aj.begin();it!=_Aj.end();it++){
-        cout<<*it<<" ";
-    }
-    cout<<endl;
-    
-}
 
 bool PSteiner::NodeTight(node_val_pair np, edge_val_pair ep, moat_val_pair mp){
     bool ret= (np.val<=ep.val) && (np.val<= mp.val);
@@ -459,7 +442,7 @@ bool PSteiner::MoatTight(node_val_pair np, edge_val_pair ep, moat_val_pair mp){
 
 void PSteiner::Bill2Pnty(unordered_set<int> tmoat){
     for(auto it=tmoat.begin();it!=tmoat.end();it++){
-        terms_paid_pnty.insert(*it);
+        if(prev_terms.find(*it)!=prev_terms.end())terms_paid_pnty.insert(*it);
     }
 }
 
@@ -467,10 +450,11 @@ void PSteiner::Dual_Growth(int level_j){
     
     unordered_set <int> ActMoatC=(moats[level_j])[current_active_term];
     unordered_set <int> ActMoatR=(moats[level_j])[RootInd];
-    
+    //_Aj1=_Aj;// _Aj1 is the set of active terms to be passed to next level. _Aj can be change in Dual_Growth, while _Aj1 does not change;
+    //_A.clear(); // records active terms for next level                                                                        //therefore DO NOT use _Aj in for loops
     while(!_Aj.empty()){
         
-        Join_CC(level_j);// connect components if possible
+        Consolidate(level_j);// connect components if possible
         
         cout<<"size of _Aj = "<<_Aj.size()<<endl;
         
@@ -506,11 +490,14 @@ void PSteiner::Dual_Growth(int level_j){
             /*UPDATE boolean values */
             
             /*case: node become inactive*/
-            if(NodeTight(nvp,evp,mvp)) {
+            if(NodeTight(nvp,evp,mvp)) {//node tight: erase corresponding active term from _Aj
                 cout<<"Node "<< nvp.node<<" Tight"<<endl;
                 for(auto it=moats[level_j][nvp.node].begin();it!=moats[level_j][nvp.node].end();it++){
                     _Aj.erase(*it);
                 }
+                //update _A
+                if(ActMoatC.find(nvp.node)!=ActMoatC.end()) _A.insert(current_active_term);
+                else {_A.insert(RootInd);}
                 /*Update structures: deactivate all nodes in this active moat */
                 /* no structure to be updated*/
             }
@@ -520,14 +507,14 @@ void PSteiner::Dual_Growth(int level_j){
                 /*for(auto it=(mvp.moat).begin();it!=(mvp.moat).end();it++){cout<<*it;}
                 for(auto it=(ActMoatR).begin();it!=(ActMoatR).end();it++){cout<<*it;}
                 cout<<endl;*/
-                if(mvp.moat==ActMoatC){
-                    _A.erase(current_active_term); 
+                if(mvp.moat==ActMoatC){ // moat tight: erase corresponding active term from _Aj
+                    //_A.insert(current_active_term); 
                     _Aj.erase(current_active_term); 
                     cout<<"current_term is set inactive"<<endl;
                     Bill2Pnty(mvp.moat);
                 }
                 else{
-                    _A.erase(RootInd); 
+                    //_A.insert(RootInd); 
                     _Aj.erase(RootInd); 
                     cout<<"root is set inactive"<<endl;
                     Bill2Pnty(mvp.moat);
@@ -554,6 +541,9 @@ void PSteiner::Dual_Growth(int level_j){
                 moat_j_pair mjp2; mjp2.j=level_j;mjp2.moat=(moats[level_j])[evp.node2];
                 /*Update dual_j_pnty since there are colliding moats*/
                 dual_j_pnty[mjp]=dual_j_pnty[mjp1]+dual_j_pnty[mjp2];
+                
+                
+                
             }
 
             
@@ -562,9 +552,9 @@ void PSteiner::Dual_Growth(int level_j){
             
             //int Term=0; 
             unordered_set<int> ActMoatT;
-            if(_Aj.find(RootInd)!=_Aj.end()) ActMoatT=ActMoatR;
-            else ActMoatT=ActMoatC;
-            cout<<"[1 act] "<<endl;
+            if(_Aj.find(current_active_term)!=_Aj.end()) ActMoatT=ActMoatC;
+            else ActMoatT=ActMoatR;
+            cout<<"[1 act] =" <<endl;
             node_val_pair nvp =Find_dual_j_limit(level_j, ActMoatT);// 
             edge_val_pair evp=Find_tight_j_edge_1(level_j, ActMoatT);//
             moat_val_pair mvp=Find_pnty_j_moat(level_j, ActMoatT);
@@ -580,22 +570,25 @@ void PSteiner::Dual_Growth(int level_j){
 
             Update_dual_pnty1(incr, level_j, ActMoatT);
             
-            if(NodeTight(nvp,evp,mvp)) {
-                cout<<"NodeTight"<<endl;
+            if(NodeTight(nvp,evp,mvp)) {// node tight: erase corresponding active node from _Aj
+                cout<<"Node " << nvp.node<<" Tight"<<endl;
                 for(auto it=moats[level_j][nvp.node].begin();it!=moats[level_j][nvp.node].end();it++){
                     _Aj.erase(*it);
-                }            
+                }
+                //update _A
+                if(ActMoatC.find(nvp.node)!=ActMoatC.end()) _A.insert(current_active_term);
+                else {_A.insert(RootInd);}
             }
-            else if(MoatTight(nvp,evp,mvp)) {
+            else if(MoatTight(nvp,evp,mvp)) {// moat tight: erase corresponding active node from _Aj
                 cout<<"Moat Tight"<<endl;
                 if(mvp.moat==ActMoatC){
-                    _A.erase(current_active_term);
+                    //_A.insert(current_active_term);
                     _Aj.erase(current_active_term);                   
                     cout<<"current_term is set inactive"<<endl;
                     Bill2Pnty(ActMoatC);
                 }
-                else{
-                    _A.erase(RootInd);
+                if(mvp.moat==ActMoatR){
+                    //_A.insert(RootInd);
                     _Aj.erase(RootInd);
                     cout<<"Root is set inactive"<<endl;
                     Bill2Pnty(ActMoatR);
@@ -603,7 +596,7 @@ void PSteiner::Dual_Growth(int level_j){
                 /*update structure*/
                 /* no structure to be updated*/
             }
-            else{
+            else{// edge tight: erase NO terminal from _Aj, updated moat structure instead
                 /*Update structure*/
                 cout<<"Edge Tight"<<evp.node1<<" -- "<<evp.node2<<endl;
                 unordered_set<int> nmoat=(moats[level_j])[evp.node1];
@@ -631,6 +624,7 @@ void PSteiner::Dual_Growth(int level_j){
     
     
 }
+
 
 /* update by adding incr to all relevant edges in "unordered_map <edge_j_pair, double > dual_edge" in level-j */
 
@@ -692,47 +686,65 @@ void PSteiner::Update_dual_pnty1(double incr, int j, unordered_set<int> ActMoat1
 }
 
 void PSteiner::Algo(){
-    previous_active_terms.insert(RootInd);
+    prev_terms.insert(RootInd);
     
     for (int ind=0; ind< ArrTerminals.size(); ind++){
         current_active_term=ArrTerminals[ind];
-        cout<<"_________________________New Terminal Arrives: "<< current_active_term<<endl;
-        terms_pnty[RootInd]=terms_pnty[current_active_term];
+        prev_terms.insert(current_active_term);
         
-        _A.clear();
-        _A.insert(RootInd); _A.insert(current_active_term);
-                
+        cout<<"_________________________New Terminal Arrives: "<< current_active_term<<endl;
+        terms_pnty[RootInd]+=terms_pnty[current_active_term];
+        _Aj.clear();
+        _Aj.insert(RootInd); _Aj.insert(current_active_term);
+         
+
         for (int level_j=0;level_j<=100; level_j++ ){
+            if(_Aj.empty()) break;  
+            _A.clear();
+
+            //update _P[j]
+            for(auto it=_Aj.begin(); it!=_Aj.end();it++){
+                _P[level_j].insert(*it);
+            }
             
+            
+
             cout<<"______________Invoke level_"<<level_j<<"_____________"<<endl;
-            _Aj.clear();
-            _Aj=_A;
-            /* Prevent Segmentation Fault: enlarge size of moats if needed*/
+
+            // Prevent Segmentation Fault: enlarge size of moats if needed
             if(moats.size()<level_j+1) {
                 unordered_map<int, unordered_set <int> > temp;
                 moats.push_back(temp);
             }
 
-            /* Updating \bar F^j  is done whenever F is updated */
+            // Updating \bar F^j  is done whenever F is updated 
             for(int i=1; i<=NumVertices; i++){
                 for(auto it=ConnComp[i].begin(); it!=ConnComp[i].end(); it++){
                     (moats[level_j])[i].insert(*it);
                 }
             }
 
-            /* End Updating*/
+            // End Updating*
 
-            /*Consolidate step: modifies F  if consolidate_done==true */
+            //Consolidate step: modifies F  if consolidate_done==true 
+
             
-            Consolidate(level_j);
+          /*  Consolidate(level_j);
             cout<<"Consolidate Done"<<endl;
-            
+            if(_Aj.empty()) break;           
+          */
+            //_Aj1.clear(); // clear the set of active terms for next round
             Dual_Growth(level_j);
             cout<<"Dual_Growth Done"<<endl;
-            // if consolidate step does not connect the current_active_term to the tree: Dual Growing!
-            if(_A.empty()) break;           
+            //_Aj.clear();
+            //update active terms for next round
+            //if(moats[level_j][current_active_term].find(RootInd)!= moats[level_j][current_active_term].end()){
+            //    _Aj.insert(current_active_term); _Aj.insert(RootInd);
+            //}
+            _Aj=_A;
+            
         }    
-        previous_active_terms.insert(current_active_term);
+        //previous_active_terms.insert(current_active_term);
         
     }
     

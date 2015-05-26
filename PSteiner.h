@@ -342,28 +342,76 @@ public:
     }
     
     void print_Algo_sol(){
-        cout<<"bought edges:"<<endl;
-        double total_conn=0;
-        for(auto it=bought_edges.begin(); it!=bought_edges.end();it++){
-            node_pair tp; tp.node1=min(it->node1, it->node2); tp.node2=max(it->node1, it->node2);
-            total_conn+=(double)Graph[tp];
-            cout<< it->node1<<" "<< it->node2 <<endl;
+        //check feasibility:
+        unordered_set<int> infeas;
+        for(auto it=ArrTerminals.begin(); it!=ArrTerminals.end(); it++){
+            if(ConnComp[RootInd].find(*it)==ConnComp[RootInd].end() && terms_paid_pnty.find(*it)==terms_paid_pnty.end() ) infeas.insert(*it);
         }
+        if(infeas.size()>0) {
+            cout<<"Solution is infeasible:";
+            for (auto it=infeas.begin();it!=infeas.end();it++){
+                cout<<" "<<*it;
+            }
+            cout<<endl<<endl;
+        }
+        else{cout<<"Feasible solution."<<endl;}
         
         cout<<"total connection costs = "<<ConnCost<<endl<<endl; 
+        
+        cout<<"Bought Edges:"<<endl;
+        int cc_check=0;
+        for(auto it =bought_edges.begin();it!=bought_edges.end(); it++){
+            cout<<"  "<<it->node1<< " -- "<< it->node2<<endl;
+            cc_check+=Graph[*it];
+        }
+        cout<<"total connection costs(check) = "<<cc_check<<endl;
+        
         cout<<"penalty terminals:"<<endl;
         double total_pnty=0;
         for(auto it=terms_paid_pnty.begin(); it!=terms_paid_pnty.end();it++){
             cout<< *it<< " ";
-            //total_pnty+=terms_pnty[*it];
+            if(*it != RootInd) total_pnty+=terms_pnty[*it]*2;
         }
-        //cout<<"total penalty cost = "<< total_pnty<<endl<<endl;
         
+        double adj_total_pnty=0;
+        for(auto it=terms_paid_pnty.begin(); it!=terms_paid_pnty.end();it++){
+            //cout<< *it<< " ";
+            if(*it != RootInd && ConnComp[RootInd].find(*it)==ConnComp[RootInd].end()) {
+                adj_total_pnty+=terms_pnty[*it];
+                cout<< *it<< " ";
+            }
+        }
+        cout<<endl;
+        cout<<"total penalty cost = "<< total_pnty<<endl<<endl;
+        cout<<"total adjusted penalty cost = "<< adj_total_pnty<<endl<<endl;
+
+        cout<<"online algo val = "<<total_pnty+ConnCost<<endl;
+        cout<<"online algo val adj = "<<adj_total_pnty+ConnCost<<endl;
+
         cout<<endl<<"Offline Optimal = "<< OptimalVal<< endl;
         //cout<<"Online Algo Sol = "<< total_conn+total_pnty<<endl;
     }
     
 
+    vector<double> Out_sol(){
+        vector<double> ret; ret.push_back(OptimalVal);
+        //check feasibility:
+        unordered_set<int> infeas;
+        for(auto it=ArrTerminals.begin(); it!=ArrTerminals.end(); it++){
+            if(ConnComp[RootInd].find(*it)==ConnComp[RootInd].end() && terms_paid_pnty.find(*it)==terms_paid_pnty.end() ) infeas.insert(*it);
+        }
+        if(infeas.size()>0) {
+            ret.push_back(0);
+        }
+        else{
+            double total_pnty=0;
+            for(auto it=terms_paid_pnty.begin(); it!=terms_paid_pnty.end();it++){
+                if(*it != RootInd) total_pnty+=terms_pnty[*it]*2;
+            }
+            ret.push_back(total_pnty+ConnCost);
+        }
+        return ret;
+    }
     
   
 private:
@@ -397,7 +445,7 @@ private:
     vector <unordered_map < int, unordered_set<int> > > moats; // vector of moats, each corresponds to a level. 
                                                  //each is an unordered_map that maps a node to the moat it belongs to 
                                                  //use it to track \bar{F}^j  
-    unordered_set <int>  previous_active_terms; // tracks all previously active terminals
+    unordered_set <int>  prev_terms; // tracks all previously active terminals
     //vector< node_val_pair > bought_edges; //  tracks all edges bought, a.k.a. set F in paper
     
     int current_active_term;
@@ -406,7 +454,8 @@ private:
     unordered_set<int> terms_paid_pnty; // tracks all terms that paid pnty in Algo.
     vector<node_pair> bought_edges;// useful at all ????
     unordered_set<int> _A;
-    unordered_set<int> _Aj;
+    unordered_set<int> _Aj,_Aj1;
+    unordered_map<int, unordered_set<int> > _P; // _P[j] contains the previously active terminals at level j
     double ConnCost;
 }; 
 
