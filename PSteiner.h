@@ -7,6 +7,9 @@
 
 #ifndef PSTEINER_H
 #define	PSTEINER_H
+
+
+
 #include<map>
 #include<unordered_map>
 #include<unordered_set>
@@ -17,6 +20,7 @@
 #include<fstream>
 #include<sstream>
 #include<cmath>
+
 using namespace std;
 // structures defined here
 struct node_pair{ // to describe an edge
@@ -135,7 +139,6 @@ struct edge_val_pair{
     }
 
 };
-
 struct double_val_pair{
     double current_val;
     double target_val;
@@ -279,12 +282,65 @@ struct path{
     //more?
 };
 
+struct i_node{
+    int index;
+    int v;
+    int h;
+    int weight;
+};
+
+struct i_edge{
+    int x;
+    int y;
+    int len;
+};
+
+/*
+struct PSInst{
+    int root_ind;
+    int opt_val_offline;
+    int num_arr_terms;
+    int num_edges;
+    int num_nodes;
+    unordered_map <node_pair,  int> Graph;
+    vector <int> ArrTerminals;// indices
+    vector <int> ArrTerminals_Pnty;// penalties
+    unordered_map <int, vector<int> >  node_to_edges; //in the form node1 -> {node2's}]
+    
+};
+*/
+
+struct Irreg_Input {
+    vector<i_node > Nodes;
+    int root_ind;
+    int num_arr_terms;
+    int num_nodes;
+    int num_edges;
+    unordered_map<node_pair, int> Graph;
+    vector<int> ArrTerminals;
+    vector<int> ArrTerminals_Pnty;
+    unordered_map<int, vector<int> >node_to_edges; 
+    
+    
+    Irreg_Input(){
+        root_ind=0;
+        num_arr_terms=0;
+        num_nodes=0;
+        num_edges=0;
+        
+    }
+};
+Irreg_Input irreg_read_in(string arg);
+Irreg_Input irreg_read_in_Alter(string arg);
+
+vector<int> perm_vec_read_in(string perm_fname);
 
 class PSteiner {
 public:
     PSteiner();
     PSteiner(const PSteiner& orig);
     PSteiner(const PSInst& );
+    PSteiner(const Irreg_Input& );
     virtual ~PSteiner();
      /* methods */
     const node_val_pair Find_dual_j_limit(int j, unordered_set<int> ActMoat1) ; // return the index of the node that would reach level-j limit first; covers case 1)
@@ -297,7 +353,7 @@ public:
     void DG_Dijkstra(int j ,const int s1, const int s2);  //this function modifies member F, used in Dual_Growth 
     
     void Dual_Growth(int j);
-    
+        
     void Update_dual_edges1(double incr, int j, unordered_set<int> ActMoat1);
 
     void Update_dual_edges2(double incr, int j, unordered_set<int> ActMoat1, unordered_set<int> ActMoat2);
@@ -319,7 +375,25 @@ public:
     bool MoatTight(node_val_pair, edge_val_pair, moat_val_pair );
     
     void Bill2Pnty(unordered_set<int> this_moat);
-    
+        
+    int Modify_Arr_Perm(vector<int> perm){
+        if(perm.size()!=ArrTerminals.size()) {cerr<<"Modify_Arr_Perm size doesnt match!"; return 0;}
+        for(int i=0; i<perm.size();i++){
+            ArrTerminals_Pnty[i]=terms_pnty[perm[i]]*2;
+        }
+        ArrTerminals=perm;
+        RootInd=ArrTerminals[0];
+        terms_pnty[RootInd]=0;
+        return 0;
+    };
+    int No_Perm(){
+        RootInd=ArrTerminals[0];
+        terms_pnty[RootInd]=0;
+        ArrTerminals_Pnty[RootInd]=0;
+        
+        return 0;
+    };
+
     void print_PS(){
         bool edge_match = (Graph.size()==NumEdges);
         bool arriving_terms_match=(ArrTerminals.size()==ArrTerminals_Pnty.size())&& (ArrTerminals_Pnty.size()==NumArrTerminals)&& (NumArrTerminals==terms_pnty.size());
@@ -337,7 +411,10 @@ public:
             }
             cout<<endl;
         }
-        
+        cout<<"ArrivingTerminals pnlties:"<<endl;
+        for(int i=0; i< ArrTerminals.size();i++){
+            cout<<ArrTerminals[i]<<"  "<< ArrTerminals_Pnty[i]<<endl;
+        }
         
     }
     
@@ -364,6 +441,20 @@ public:
             cout<<"  "<<it->node1<< " -- "<< it->node2<<endl;
             cc_check+=Graph[*it];
         }
+        
+        cout<<"[";
+        for(auto it =bought_edges.begin();it!=bought_edges.end(); it++){
+            cout<<it->node1<<",";
+        }
+        cout<<"]"<<endl;
+        
+        cout<<"[";
+        for(auto it =bought_edges.begin();it!=bought_edges.end(); it++){
+            cout<<it->node2<<",";
+        }
+        cout<<"]"<<endl;
+        
+        
         cout<<"total connection costs(check) = "<<cc_check<<endl;
         
         cout<<"penalty terminals:"<<endl;
@@ -392,7 +483,23 @@ public:
         //cout<<"Online Algo Sol = "<< total_conn+total_pnty<<endl;
     }
     
-
+    void print_cost_lists(){
+        cout.precision(15);
+        cout<<"ConnCosts + PntyCosts :  ";
+        for (int i=0; i<ConnCostList.size();i++){
+            cout<< ConnCostList[i]+PntyCostList[i]<<endl;   
+        }
+        cout<<endl;
+        
+        /*cout<<"PntyCosts:  ";
+        for (auto it =PntyCostList.begin(); it!=PntyCostList.end();it++){
+            cout<< *it<<" ";
+        }
+        cout<<endl;
+        */
+        
+    }
+    
     vector<double> Out_sol(){
         vector<double> ret; ret.push_back(OptimalVal);
         //check feasibility:
@@ -410,7 +517,7 @@ public:
             }
             ret.push_back(total_pnty+ConnCost);
         }
-        return ret;
+        return ret;//ret[0] is OptimalVal, ret[1] is OnlineVal
     }
     
   
@@ -456,7 +563,9 @@ private:
     unordered_set<int> _A;
     unordered_set<int> _Aj,_Aj1;
     unordered_map<int, unordered_set<int> > _P; // _P[j] contains the previously active terminals at level j
-    double ConnCost;
+    double ConnCost,PntyCost;
+    unordered_map<int, unordered_set<int> > bought_tree;
+    vector<double> ConnCostList, PntyCostList;
 }; 
 
 
