@@ -7,6 +7,7 @@
 
 #include"PSteiner.h"
 #include"reg_input.h"
+#include "PSteiner_TM.h"
 //#include"irreg_input.h"
 //#include"boost/graph/adjacency_matrix.hpp"
 using namespace std;
@@ -155,6 +156,57 @@ vector<int> get_perm_from_file(string arg, int ifile_number){
 
 int main(int argc, char** argv) {
     
+    /*
+    vector <int> perm=get_perm_from_file("k200/k200_R2_online_", 32);
+    for(auto it = perm.begin(); it!=perm.end(); it++){
+        cout<<*it<<" ";
+    }
+    cout<<endl;
+    
+    cout<<"Size = "<<perm.size()<<endl;
+    
+    
+    Irreg_Input IR= irreg_read_in("k200/k200_R3_online_32");
+    PSteiner_TM PS(IR);
+    
+    
+    vector<int> newperm;
+    for(int i=0; i<14;i++)
+        newperm.push_back(perm[i]);
+    
+    
+    
+    //vector<int> perm=perm_vec_read_in( perm_fname);
+    
+    PS.Modify_Arr_Perm(perm);    
+    PS.TM_Algo();
+    PS.PrintInst();
+    PS.Out();
+     */
+    
+    /*
+    Irreg_Input IR= irreg_read_in(argv[1]);
+    PSteiner_TM PS_TM(IR);
+    
+    PS_TM.TM_Algo();
+    
+    PS_TM.PrintInst();
+    
+    PS_TM.Out();
+    */
+    
+    process_all_regular_data_TM();
+    /*
+    PSInst psinst=read_in ("pcstp/K100.7.dat");
+    print_inst(psinst);
+    
+    PSteiner_TM PS_TM(psinst);
+    PS_TM.PrintInst();
+    PS_TM.TM_Algo();
+    
+    PS_TM.Out();
+    */
+    
     
     
     //process_all_regular_data();
@@ -165,7 +217,7 @@ int main(int argc, char** argv) {
     
     //test_irreg_read_in_Alter();
     
-    
+    /*
     Irreg_Input IR= irreg_read_in(argv[1]);
     PSteiner PS(IR);
     PS.No_Perm();
@@ -176,7 +228,7 @@ int main(int argc, char** argv) {
     cout.precision(15);
     vector<double> ans=PS.Out_sol();
     cout<< ans[1]<<endl;
-    
+    */
     
     
     /* this part is used to generate figure-6 online cases

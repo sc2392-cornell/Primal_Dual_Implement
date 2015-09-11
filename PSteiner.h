@@ -347,6 +347,8 @@ public:
     const edge_val_pair Find_tight_j_edge_1(int j, unordered_set<int> ActMoat1);  // return the edge and value for case 2)
     const edge_val_pair Find_tight_j_edge_2(int j, unordered_set<int> ActMoat1, unordered_set<int> ActMoat2);  // return the edge and value for case 2)
     moat_val_pair Find_pnty_j_moat(int j, unordered_set<int> ActMoat1);   // not const because of initializing moat when used.
+    
+    //void TreeMethod();
     void Consolidate(int j);
     void Dijkstra(const int s1, const int s2);  //this function modifies member F
     

@@ -35,6 +35,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1481816147/PSteiner_TM.o \
+	${OBJECTDIR}/_ext/1481816147/irreg_input.o \
+	${OBJECTDIR}/_ext/1481816147/treemethod.o \
 	${OBJECTDIR}/PSteiner.o \
 	${OBJECTDIR}/main.o
 
@@ -62,6 +65,21 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/primal_dual_implement: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/primal_dual_implement ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/_ext/1481816147/PSteiner_TM.o: /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1481816147
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1481816147/PSteiner_TM.o /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.cpp
+
+${OBJECTDIR}/_ext/1481816147/irreg_input.o: /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1481816147
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1481816147/irreg_input.o /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.cpp
+
+${OBJECTDIR}/_ext/1481816147/treemethod.o: /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1481816147
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1481816147/treemethod.o /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.cpp
 
 ${OBJECTDIR}/PSteiner.o: PSteiner.cpp 
 	${MKDIR} -p ${OBJECTDIR}

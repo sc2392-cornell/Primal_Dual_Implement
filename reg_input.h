@@ -8,6 +8,7 @@
 #ifndef REG_INPUT_H
 #define	REG_INPUT_H
 #include "PSteiner.h"
+#include "PSteiner_TM.h"
 
 vector<double> OnOffOpts(string f_name);
 PSInst read_in( string arg );
@@ -39,6 +40,44 @@ void process_all_regular_data(){
     }
     
 }
+vector<double> OnOffOpts_TM(string f_name){
+    PSInst psinst=read_in (f_name);
+    print_inst(psinst);
+    PSteiner_TM PS(psinst);
+    
+    PS.TM_Algo();
+    vector<double> ans = PS.Out_sol();
+    return ans;
+}
+
+void process_all_regular_data_TM(){
+    
+    vector<vector<double> > OnOffSol;
+    
+    ifstream infile("RegularFilesNames.txt");
+    
+    while(infile){
+        string s;
+        if(!getline(infile,s)) break;
+        string st="pcstp/"; st.append(s);
+        cout<<"-------------------------------------------------------computes for file "<< st;
+        OnOffSol.push_back(OnOffOpts_TM(st));
+    }
+    
+    cout<<endl;
+    cout.precision(15);
+    cout<<"=================Output Begin======================"<<endl;
+    
+    for (auto it= OnOffSol.begin(); it!=OnOffSol.end();it++){
+        for (auto it2=it->begin(); it2!=it->end();it2++){
+            cout<<*it2<< "   ";
+        }
+        cout<<endl;
+    }
+    
+}
+
+
 
 vector<double> OnOffOpts(string f_name){
     PSInst psinst=read_in (f_name);
