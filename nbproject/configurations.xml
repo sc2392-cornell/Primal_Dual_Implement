@@ -5,10 +5,9 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>PSteiner.h</itemPath>
-      <itemPath>/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.h</itemPath>
-      <itemPath>/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.h</itemPath>
-      <itemPath>/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/reg_input.h</itemPath>
-      <itemPath>/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.h</itemPath>
+      <itemPath>PSteiner_TM.h</itemPath>
+      <itemPath>irreg_input.h</itemPath>
+      <itemPath>reg_input.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -18,10 +17,9 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>PSteiner.cpp</itemPath>
-      <itemPath>/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.cpp</itemPath>
-      <itemPath>/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.cpp</itemPath>
+      <itemPath>PSteiner_TM.cpp</itemPath>
+      <itemPath>irreg_input.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
-      <itemPath>/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -37,6 +35,9 @@
     <itemPath>/Users/cheungsinshuen/NetBeansProjects/Primal_Dual_Implement/pcstp/K100.1.dat</itemPath>
     <itemPath>output.txt</itemPath>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="1">
@@ -47,47 +48,12 @@
       </toolsSet>
       <compileType>
         <ccTool>
+          <developmentMode>2</developmentMode>
           <standard>8</standard>
-          <incDir>
-            <pElem>../../Documents/github/boost_1_58_0/boost</pElem>
-          </incDir>
+          <commandlineTool>g++-4.9</commandlineTool>
+          <warningLevel>2</warningLevel>
         </ccTool>
       </compileType>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/reg_input.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="/Users/cheungsinshuen/NetBeansProjects/Primal_Dual_Implement/pcstp/K100.1.dat"
             ex="false"
             tool="3"
@@ -97,9 +63,19 @@
       </item>
       <item path="PSteiner.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PSteiner_TM.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PSteiner_TM.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="irreg_input.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="irreg_input.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="output.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="reg_input.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -122,41 +98,6 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/reg_input.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="/Users/cheungsinshuen/NetBeansProjects/Primal_Dual_Implement/pcstp/K100.1.dat"
             ex="false"
             tool="3"
@@ -166,9 +107,19 @@
       </item>
       <item path="PSteiner.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="PSteiner_TM.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="PSteiner_TM.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="irreg_input.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="irreg_input.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="output.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="reg_input.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

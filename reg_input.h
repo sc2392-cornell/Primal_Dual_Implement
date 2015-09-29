@@ -11,6 +11,8 @@
 #include "PSteiner_TM.h"
 
 vector<double> OnOffOpts(string f_name);
+vector<double> OnOffOpts_simp(string f_name);
+
 PSInst read_in( string arg );
 void print_inst(PSInst psinst);
 
@@ -40,6 +42,48 @@ void process_all_regular_data(){
     }
     
 }
+
+
+void process_all_regular_data_simp(){
+    
+    vector<vector<double> > OnOffSol;
+    
+    ifstream infile("RegularFilesNames.txt");
+    
+    while(infile){
+        string s;
+        if(!getline(infile,s)) break;
+        string st="pcstp/"; st.append(s);
+        cout<<"-------------------------------------------------------computes for file "<< st;
+        OnOffSol.push_back(OnOffOpts_simp(st));
+    }
+    
+    cout<<endl;
+    cout.precision(15);
+    cout<<"=================Output Begin======================"<<endl;
+    
+    for (auto it= OnOffSol.begin(); it!=OnOffSol.end();it++){
+        for (auto it2=it->begin(); it2!=it->end();it2++){
+            cout<<*it2<< "   ";
+        }
+        cout<<endl;
+    }
+    
+}
+
+
+
+
+vector<double> OnOffOpts_simp(string f_name){
+    PSInst psinst=read_in (f_name);
+    print_inst(psinst);
+    PSteiner PS(psinst);
+    
+    PS.Algo_Simp();
+    vector<double> ans = PS.Out_sol();
+    return ans;
+}
+
 vector<double> OnOffOpts_TM(string f_name){
     PSInst psinst=read_in (f_name);
     print_inst(psinst);

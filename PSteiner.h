@@ -355,6 +355,9 @@ public:
     void DG_Dijkstra(int j ,const int s1, const int s2);  //this function modifies member F, used in Dual_Growth 
     
     void Dual_Growth(int j);
+    
+    void Dual_Growth_Simp(int j);
+
         
     void Update_dual_edges1(double incr, int j, unordered_set<int> ActMoat1);
 
@@ -369,6 +372,9 @@ public:
     void Join_CC(int j);
     
     void Algo();
+    
+    void Algo_Simp();
+    
     
     bool NodeTight(node_val_pair, edge_val_pair, moat_val_pair );
     

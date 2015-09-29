@@ -6,8 +6,9 @@
  */
 
 #include"PSteiner.h"
+#include<algorithm>
 #include"reg_input.h"
-#include "PSteiner_TM.h"
+#include"PSteiner_TM.h"
 //#include"irreg_input.h"
 //#include"boost/graph/adjacency_matrix.hpp"
 using namespace std;
@@ -154,10 +155,9 @@ vector<int> get_perm_from_file(string arg, int ifile_number){
 
 
 
-int main(int argc, char** argv) {
-    
-    /*
-    vector <int> perm=get_perm_from_file("k200/k200_R2_online_", 32);
+void Umboh_Fig6(){
+
+    vector <int> perm=get_perm_from_file("k100.8/K100.8_R1_online_", 14);
     for(auto it = perm.begin(); it!=perm.end(); it++){
         cout<<*it<<" ";
     }
@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
     cout<<"Size = "<<perm.size()<<endl;
     
     
-    Irreg_Input IR= irreg_read_in("k200/k200_R3_online_32");
+    Irreg_Input IR= irreg_read_in("k100.8/K100.8_R1_online_14");
     PSteiner_TM PS(IR);
     
     
@@ -182,7 +182,56 @@ int main(int argc, char** argv) {
     PS.TM_Algo();
     PS.PrintInst();
     PS.Out();
-     */
+
+
+}
+
+
+int main(int argc, char** argv) {
+    /*  Instances with permutations: */
+    /*
+    vector <int> perm=get_perm_from_file("reduced_inputs/P400.con.red_online_", 79);
+    for(auto it = perm.begin(); it!=perm.end(); it++){
+        cout<<*it<<" ";
+    }
+    cout<<endl;
+    
+    cout<<"Size = "<<perm.size()<<endl;
+    
+    
+    Irreg_Input IR= irreg_read_in("reduced_inputs/P400.con.red_online_79");
+    PSteiner_TM PS(IR);
+    
+    
+    vector<int> newperm;
+    for(int i=0; i<14;i++)
+        newperm.push_back(perm[i]);
+    */
+    
+    
+    //vector<int> perm=perm_vec_read_in( perm_fname);
+    /*
+    PS.Modify_Arr_Perm(perm);    
+    PS.TM_Algo();
+    PS.PrintInst();
+    PS.Out();
+    */
+   
+
+    
+    
+    
+    /*Irregular instance without permutations */
+    
+    
+    /*
+    Irreg_Input IR= irreg_read_in_Alter(argv[1]);
+    PSteiner_TM PS(IR);
+    
+    PS.TM_Algo();
+    PS.PrintInst();
+    PS.Out();    
+    */
     
     /*
     Irreg_Input IR= irreg_read_in(argv[1]);
@@ -195,19 +244,19 @@ int main(int argc, char** argv) {
     PS_TM.Out();
     */
     
-    process_all_regular_data_TM();
-    /*
-    PSInst psinst=read_in ("pcstp/K100.7.dat");
+    //process_all_regular_data_TM();
+    
+    
+    PSInst psinst=read_in ("pcstp/K100.1.dat");
     print_inst(psinst);
     
-    PSteiner_TM PS_TM(psinst);
-    PS_TM.PrintInst();
-    PS_TM.TM_Algo();
+    PSteiner PS(psinst);
+    PS.Algo_Simp();
     
-    PS_TM.Out();
-    */
+    PS.print_Algo_sol();
     
     
+    //process_all_regular_data_simp();
     
     //process_all_regular_data();
     

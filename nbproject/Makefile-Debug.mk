@@ -15,14 +15,14 @@ NM=nm
 CCADMIN=CCadmin
 RANLIB=ranlib
 CC=gcc
-CCC=g++
-CXX=g++
+CCC=g++-4.9
+CXX=g++-4.9
 FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-MacOSX
-CND_DLIB_EXT=dylib
+CND_PLATFORM=GNU-Linux-x86
+CND_DLIB_EXT=so
 CND_CONF=Debug
 CND_DISTDIR=dist
 CND_BUILDDIR=build
@@ -35,10 +35,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/1481816147/PSteiner_TM.o \
-	${OBJECTDIR}/_ext/1481816147/irreg_input.o \
-	${OBJECTDIR}/_ext/1481816147/treemethod.o \
 	${OBJECTDIR}/PSteiner.o \
+	${OBJECTDIR}/PSteiner_TM.o \
+	${OBJECTDIR}/irreg_input.o \
 	${OBJECTDIR}/main.o
 
 
@@ -66,30 +65,25 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/primal_dual_implement: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/primal_dual_implement ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/_ext/1481816147/PSteiner_TM.o: /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/1481816147
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../Documents/github/boost_1_58_0/boost -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1481816147/PSteiner_TM.o /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/PSteiner_TM.cpp
-
-${OBJECTDIR}/_ext/1481816147/irreg_input.o: /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/1481816147
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../Documents/github/boost_1_58_0/boost -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1481816147/irreg_input.o /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/irreg_input.cpp
-
-${OBJECTDIR}/_ext/1481816147/treemethod.o: /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/1481816147
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../Documents/github/boost_1_58_0/boost -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1481816147/treemethod.o /Users/cheungsinshuen/Documents/github/Primal_Dual_Implement/treemethod.cpp
-
 ${OBJECTDIR}/PSteiner.o: PSteiner.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../Documents/github/boost_1_58_0/boost -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PSteiner.o PSteiner.cpp
+	$(COMPILE.cc) -g -O -Wall -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PSteiner.o PSteiner.cpp
+
+${OBJECTDIR}/PSteiner_TM.o: PSteiner_TM.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -O -Wall -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PSteiner_TM.o PSteiner_TM.cpp
+
+${OBJECTDIR}/irreg_input.o: irreg_input.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -O -Wall -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/irreg_input.o irreg_input.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../Documents/github/boost_1_58_0/boost -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g -O -Wall -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 # Subprojects
 .build-subprojects:

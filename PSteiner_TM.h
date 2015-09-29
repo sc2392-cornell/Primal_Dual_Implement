@@ -115,12 +115,28 @@ public:
     void Update_rho(int i, unordered_set<int> W, int j,vector<int> path);// updates rho_i, and buy edge or pay penalty, accordingly
     
     int TM_Algo(){
-        RootInd=ArrTerminals[0];
-        if(ArrTerminals.size()<1)
+        
+        
+        
+        
+
+        if(ArrTerminals.size()<2)
         {
             cerr<<"Error: Too few arriving terminals";      
             return 0;
         }
+        else{
+            if (ArrTerminals_Pnty[0]<ArrTerminals_Pnty[1]){
+                int T_ind=ArrTerminals_Pnty[0];
+                ArrTerminals_Pnty[0]=ArrTerminals_Pnty[1];
+                ArrTerminals_Pnty[1]=T_ind;
+                T_ind=ArrTerminals[0];
+                ArrTerminals[0]=ArrTerminals[1];
+                ArrTerminals[1]=T_ind;
+            }
+        }
+        
+        RootInd=ArrTerminals[0];
         
         Z.insert(RootInd);
         
@@ -133,6 +149,9 @@ public:
             }*/
             //finds closest terminal in Z to i, set j, add i to X_j
             if(Z.find(ArrTerminals[ind])!=Z.end()){
+                L_BoughtEdges.push_back(BoughtEdges); 
+                L_ConnCost.push_back(ConnCost);
+                L_PntyCost.push_back(PntyCost);
                 continue;
             }
             
@@ -144,7 +163,9 @@ public:
             
             Update_rho(ind, W, zjpair.j, zjpair.path);
                 
-                
+            L_BoughtEdges.push_back(BoughtEdges); 
+            L_ConnCost.push_back(ConnCost);
+            L_PntyCost.push_back(PntyCost);
         }
         
     };
@@ -166,6 +187,7 @@ public:
     }
     
     void Out(){
+        cout.precision(15);
         cout<<"TotalCost="<<ConnCost+PntyCost<<endl;
         cout<<"ConnCost="<<ConnCost<<endl;
         cout<<"PntyCost="<<PntyCost<<endl;
@@ -179,6 +201,33 @@ public:
             cout<< *it<<" ";
         }
         cout<<endl;
+        
+        cout<<"====Start Output L_BoughtEdges==="<<endl;
+        
+        for(int ind=0; ind<L_BoughtEdges.size();ind++){
+            cout<<"------ ind = "<< ind<<" -----"<<endl;
+            vector<int> Left, Right;
+            for (auto it=L_BoughtEdges[ind].begin();it!=L_BoughtEdges[ind].end(); it++){
+                Left.push_back(it->node1);
+                Right.push_back(it->node2);
+            }
+            cout<<"LeftNodes and RightNodes:"<<endl;
+            for(auto it=Left.begin();it!=Left.end(); it++){
+                cout<< *it<<",";
+            }
+            cout<<endl;
+            for(auto it=Right.begin();it!=Right.end(); it++){
+                cout<< *it<<",";
+            }
+            cout<<endl;
+        
+        }
+        
+        
+        cout<<"====Start Output Total Costs Sequentially ==="<<endl;
+        for(int ind=0; ind<L_ConnCost.size();ind++){
+            cout<<L_ConnCost[ind]+L_PntyCost[ind]<<endl;
+        }
         
        
     };
@@ -217,7 +266,11 @@ private:
     unordered_set<int> PenTerms;// records terms that pays penalty
     unordered_map <node_pair,  bool  > F; // set of purchased edges 
     double ConnCost,PntyCost;
+    vector<double> L_ConnCost, L_PntyCost;
 
+    vector<unordered_set<node_pair> > L_BoughtEdges;
+    
+    
     
 
     

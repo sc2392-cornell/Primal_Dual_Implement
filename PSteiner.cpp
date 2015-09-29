@@ -326,9 +326,12 @@ void PSteiner::Dijkstra(const int s1, const int s2){
 void PSteiner::DG_Dijkstra(int j, const int s1, const int s2){
     cout<<"______Invoked DG_Dijkstra to connect "<<s1<<" to "<<s2<<endl;   
     if((moats[j])[s1].find(s2)==(moats[j])[s1].end() ) {cout<<" ERROR~ "<<endl;}
+    cout<<"Level = "<<j<<endl;
     cout<<"Moat Size= "<< (moats[j])[s1].size()<<" and "<< (moats[j])[s2].size();
     cout<<"Moat Contains" <<endl;
     for(auto it=(moats[j])[s1].begin();it!=(moats[j])[s1].end();it++){cout<<" "<<*it; }
+    cout<<endl;
+    for(auto it=(moats[j])[s2].begin();it!=(moats[j])[s2].end();it++){cout<<" "<<*it; }
     cout<<endl;
     unordered_map<int, bool> Mark; ; // Marked == min_val is obtained
     unordered_map<int, int> Val; Val[s1]=0;// all initialized at 0
@@ -430,6 +433,7 @@ void PSteiner::DG_Dijkstra(int j, const int s1, const int s2){
     
     while(true){
         node_pair np; np.node1=min(NOW, TraceBack[NOW]);np.node2=max(NOW, TraceBack[NOW]);
+        if(np.node1==0 || np.node2==0){cout<<"Dijkstra Error! Traced back to 0!"; break; }
         if(bought_tree[NOW].find(TraceBack[NOW])==bought_tree[NOW].end()){
             //update F accordingly
             cout<<"Buy edge  "<<np.node1<<" -- "<<np.node2<<endl; 
@@ -677,6 +681,195 @@ void PSteiner::Dual_Growth(int level_j){
 }
 
 
+
+void PSteiner::Dual_Growth_Simp(int level_j){
+    
+    unordered_set <int> ActMoatC=(moats[level_j])[current_active_term];
+    unordered_set <int> ActMoatR=(moats[level_j])[RootInd];
+    //_Aj1=_Aj;// _Aj1 is the set of active terms to be passed to next level. _Aj can be change in Dual_Growth, while _Aj1 does not change;
+    //_A.clear(); // records active terms for next level                                                                        //therefore DO NOT use _Aj in for loops
+    while(!_Aj.empty()){
+        
+        //Consolidate(level_j);// connect components if possible
+        
+        //cout<<"size of _Aj = "<<_Aj.size()<<endl;
+        
+        //if(_Aj.empty()) {break;} // if no active terms left, break the while loop
+        
+        
+        if(ActMoatC.find(RootInd)!=ActMoatC.end()){
+        // if \bar F_j already contains both active terms, then connect them through shortest path and move on
+            DG_Dijkstra(level_j,RootInd,current_active_term);
+            _Aj.clear();
+            _A.clear();
+            //connect RootInd and current_active_term by shortest path
+        }
+        else if(_Aj.size()==2){ // both are active at current level
+//            cout<<"             Dual_Growth with active terms "<<current_active_term<<endl;
+            //cout<<"[2 act]"<<endl;
+            node_val_pair nvpC = Find_dual_j_limit(level_j, ActMoatC);//cout<<nvpC.val;// 
+            node_val_pair nvpR = Find_dual_j_limit(level_j, ActMoatR);//cout<<"  "<<nvpR.val<<endl;// 
+            node_val_pair nvp; if(nvpC.val<nvpR.val){nvp=nvpC;} else{nvp=nvpR;}
+            
+//            cout<<"CP6:"<<nvp.node<< "  "<<nvp.val<<endl;
+            edge_val_pair evp=Find_tight_j_edge_2(level_j, ActMoatC, ActMoatR);//cout<<evp.val<<endl;
+//            cout<<"CP7:"<<evp.node1<<" "<<evp.node2 <<" "<<evp.val<<endl;
+            moat_val_pair mvp,mvpC,mvpR;
+            mvpC=Find_pnty_j_moat(level_j, ActMoatC);//cout<<mvpC.val;
+            mvpR=Find_pnty_j_moat(level_j, ActMoatR);//cout<<"  "<<mvpR.val<<endl;
+            if(mvpR.val<=mvpC.val){mvp=mvpR;}
+            else{mvp=mvpC;}
+//            cout<<"CP8:"<<mvp.moat.size()<< "  "<<mvp.val<<endl;            
+            double incr= min(nvp.val,min(evp.val, mvp.val)); // increment over y_S^j for moat S containing current_active_term
+//            cout<<"             Dual_Growth: incr = "<<incr<<endl;
+            /* UPDATE dual records */
+            Update_dual_edges2(incr, level_j, ActMoatC,ActMoatR);
+    
+            Update_dual_nodes1(incr, level_j, ActMoatC);
+            Update_dual_nodes1(incr,level_j,ActMoatR);
+
+            Update_dual_pnty1(incr, level_j, ActMoatC);
+            Update_dual_pnty1(incr, level_j, ActMoatR);
+            
+            /*UPDATE boolean values */
+            
+            /*case: node become inactive*/
+            if(NodeTight(nvp,evp,mvp)) {//node tight: erase corresponding active term from _Aj
+                //cout<<"Node "<< nvp.node<<" Tight"<<endl;
+                for(auto it=moats[level_j][nvp.node].begin();it!=moats[level_j][nvp.node].end();it++){
+                    _Aj.erase(*it);
+                }
+                //update _A
+                if(ActMoatC.find(nvp.node)!=ActMoatC.end()) _A.insert(current_active_term);
+                else {_A.insert(RootInd);}
+                /*Update structures: deactivate all nodes in this active moat */
+                /* no structure to be updated*/
+            }
+            /*case: moat (penalty) becomes tight*/
+            else if(MoatTight(nvp,evp,mvp)) {
+                //cout<<"Moat Tight --";
+                /*for(auto it=(mvp.moat).begin();it!=(mvp.moat).end();it++){cout<<*it;}
+                for(auto it=(ActMoatR).begin();it!=(ActMoatR).end();it++){cout<<*it;}
+                cout<<endl;*/
+                if(mvp.moat==ActMoatC){ // moat tight: erase corresponding active term from _Aj
+                    //_A.insert(current_active_term); 
+                    _Aj.erase(current_active_term); 
+                    //cout<<"current_term is set inactive"<<endl;
+                    Bill2Pnty(mvp.moat);
+                }
+                else{
+                    //_A.insert(RootInd); 
+                    _Aj.erase(RootInd); 
+                    //cout<<"root is set inactive"<<endl;
+                    Bill2Pnty(mvp.moat);
+                }
+                /*update structure*/
+                /* no structure to be updated*/
+            }
+            /* case: edge is tight, do not make any boolean variable false */
+            else{
+                //cout<<"Edge Tight "<< evp.node1<<" -- "<<evp.node2 <<endl;
+
+                /*Update structure*/
+                unordered_set<int> nmoat=moats[level_j][evp.node1];
+                for(auto it=(moats[level_j])[evp.node2].begin();it!=(moats[level_j])[evp.node2].end();it++){
+                    nmoat.insert(*it);
+                }
+                
+                for(auto it=nmoat.begin();it!=nmoat.end();it++){
+                    (moats[level_j])[*it] = nmoat;
+                }
+                /*Combined two moats that contain the two endpoints of the edge*/
+                moat_j_pair mjp; mjp.j=level_j; mjp.moat=nmoat; 
+                moat_j_pair mjp1; mjp1.j=level_j; mjp1.moat=(moats[level_j])[evp.node1]; 
+                moat_j_pair mjp2; mjp2.j=level_j;mjp2.moat=(moats[level_j])[evp.node2];
+                /*Update dual_j_pnty since there are colliding moats*/
+                dual_j_pnty[mjp]=dual_j_pnty[mjp1]+dual_j_pnty[mjp2];
+                
+                
+                
+            }
+
+            
+        }
+        else if(_Aj.size()==1){// the case of only one moat being active 
+            
+            //int Term=0; 
+            unordered_set<int> ActMoatT;
+            if(_Aj.find(current_active_term)!=_Aj.end()) ActMoatT=ActMoatC;
+            else ActMoatT=ActMoatR;
+            //cout<<"[1 act] =" <<endl;
+            node_val_pair nvp =Find_dual_j_limit(level_j, ActMoatT);// 
+            edge_val_pair evp=Find_tight_j_edge_1(level_j, ActMoatT);//
+            moat_val_pair mvp=Find_pnty_j_moat(level_j, ActMoatT);
+            
+            //cout<< nvp.val<<"  "<< evp.val<<"  "<<mvp.val<<endl;
+            
+            /*If node is tight*/
+            double incr= min(nvp.val,min(evp.val, mvp.val));
+            
+            Update_dual_edges1(incr, level_j, ActMoatT);
+    
+            Update_dual_nodes1(incr,level_j,ActMoatT);
+
+            Update_dual_pnty1(incr, level_j, ActMoatT);
+            
+            if(NodeTight(nvp,evp,mvp)) {// node tight: erase corresponding active node from _Aj
+                //cout<<"Node " << nvp.node<<" Tight"<<endl;
+                for(auto it=moats[level_j][nvp.node].begin();it!=moats[level_j][nvp.node].end();it++){
+                    _Aj.erase(*it);
+                }
+                //update _A
+                if(ActMoatC.find(nvp.node)!=ActMoatC.end()) _A.insert(current_active_term);
+                else {_A.insert(RootInd);}
+            }
+            else if(MoatTight(nvp,evp,mvp)) {// moat tight: erase corresponding active node from _Aj
+                //cout<<"Moat Tight"<<endl;
+                if(mvp.moat==ActMoatC){
+                    //_A.insert(current_active_term);
+                    _Aj.erase(current_active_term);                   
+                    //cout<<"current_term is set inactive"<<endl;
+                    Bill2Pnty(ActMoatC);
+                }
+                if(mvp.moat==ActMoatR){
+                    //_A.insert(RootInd);
+                    _Aj.erase(RootInd);
+                    //cout<<"Root is set inactive"<<endl;
+                    Bill2Pnty(ActMoatR);
+                }
+                /*update structure*/
+                /* no structure to be updated*/
+            }
+            else{// edge tight: erase NO terminal from _Aj, updated moat structure instead
+                /*Update structure*/
+                //cout<<"Edge Tight"<<evp.node1<<" -- "<<evp.node2<<endl;
+                unordered_set<int> nmoat=(moats[level_j])[evp.node1];
+                for(auto it=(moats[level_j])[evp.node2].begin();it!=(moats[level_j])[evp.node2].end();it++){
+                    nmoat.insert(*it);
+                }
+                //cout<<"--  nmoat size="<<nmoat.size()<<endl;
+                for(auto it=nmoat.begin();it!=nmoat.end();it++){
+                    (moats[level_j])[*it] = nmoat;
+                }
+                /*Combined two moats that contain the two endpoints of the edge*/
+                moat_j_pair mjp; mjp.j=level_j; mjp.moat=nmoat; 
+                moat_j_pair mjp1; mjp1.j=level_j; mjp1.moat=(moats[level_j])[evp.node1]; 
+                moat_j_pair mjp2; mjp2.j=level_j;mjp2.moat=(moats[level_j])[evp.node2];
+                /*Update dual_j_pnty since there are colliding moats*/
+                dual_j_pnty[mjp]=dual_j_pnty[mjp1]+dual_j_pnty[mjp2];
+            }
+            
+            
+            
+        }
+        ActMoatC=moats[level_j][current_active_term];
+        ActMoatR=moats[level_j][RootInd];
+    }
+    
+    
+}
+
+
 /* update by adding incr to all relevant edges in "unordered_map <edge_j_pair, double > dual_edge" in level-j */
 
 void PSteiner::Update_dual_edges1(double incr, int j, unordered_set<int> ActMoat1){
@@ -805,6 +998,99 @@ void PSteiner::Algo(){
     }
     
 }
+
+
+
+void PSteiner::Algo_Simp(){
+    prev_terms.insert(RootInd);
+    
+    for (int ind=0; ind< ArrTerminals.size(); ind++){
+        current_active_term=ArrTerminals[ind];
+        prev_terms.insert(current_active_term);
+        
+        cout<<"_________________________New Terminal Arrives: "<< current_active_term<<endl;
+        terms_pnty[RootInd]+=terms_pnty[current_active_term];
+        _Aj.clear();
+        
+        
+        if(ConnComp[RootInd].find(current_active_term)!=ConnComp[RootInd].end()){
+            cout<<"RootInd and current_active_term are already connected."<<endl;
+            continue;
+        } 
+        
+        _Aj.insert(RootInd); _Aj.insert(current_active_term);
+         
+
+        for (int level_j=0;level_j<=100; level_j++ ){
+            if(_Aj.empty()) break;  
+            _A.clear();
+
+            //update _P[j]
+            //for(auto it=_Aj.begin(); it!=_Aj.end();it++){
+            //    _P[level_j].insert(*it);
+            //}
+            
+            
+
+            //cout<<"______________Invoke level_"<<level_j<<"_____________"<<endl;
+
+            // Prevent Segmentation Fault: enlarge size of moats if needed
+            if(moats.size()<level_j+1) {
+                unordered_map<int, unordered_set <int> > temp;
+                moats.push_back(temp);
+            }
+
+            // Updating \bar F^j  is done whenever F is updated 
+            for(int i=1; i<=NumVertices; i++){
+                unordered_set<int> tempset;
+                for(auto it=ConnComp[i].begin(); it!=ConnComp[i].end(); it++){
+                    if(moats[level_j][i].find(*it)==moats[level_j][i].end())    tempset.insert(*it);
+                }
+                if(!tempset.empty()){
+                    unordered_set<int> nmoat;
+                    nmoat=moats[level_j][i];
+                    for (auto it =tempset.begin(); it!=tempset.end(); it++){
+                        for (auto itt=moats[level_j][*it].begin();itt!=moats[level_j][*it].end();itt++){
+                            nmoat.insert(*itt);
+                        }
+                    }
+                    for(auto it =nmoat.begin(); it!=nmoat.end(); it++){
+                        moats[level_j][*it]=nmoat;
+                    }
+                }
+            }
+
+            // End Updating*
+
+            //Consolidate step: modifies F  if consolidate_done==true 
+
+            
+          /*  Consolidate(level_j);
+            cout<<"Consolidate Done"<<endl;
+            if(_Aj.empty()) break;           
+          */
+            //_Aj1.clear(); // clear the set of active terms for next round
+            Dual_Growth_Simp(level_j);
+            //cout<<"Dual_Growth Done"<<endl;
+            //_Aj.clear();
+            //update active terms for next round
+            //if(moats[level_j][current_active_term].find(RootInd)!= moats[level_j][current_active_term].end()){
+            //    _Aj.insert(current_active_term); _Aj.insert(RootInd);
+            //}
+            _Aj=_A;
+            
+        }
+        if(!terms_paid_pnty.empty() && terms_paid_pnty.find(current_active_term)!=terms_paid_pnty.end()){
+            PntyCost+=terms_pnty[current_active_term]*2;
+        }
+        ConnCostList.push_back(ConnCost);
+        PntyCostList.push_back(PntyCost);
+        //previous_active_terms.insert(current_active_term);
+        
+    }
+    
+}
+
 
 vector<int> perm_vec_read_in(string arg){
     vector<int> ret;
